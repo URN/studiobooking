@@ -1,0 +1,32 @@
+{% extends "layout.htm" %}
+{% block content %}
+<div id="booking"></div>
+<div id="calendar"></div>
+<script>
+
+$(document).ready(function() {
+
+    $('#calendar').fullCalendar({
+    dayClick: function(date, allDay, jsEvent, view) {
+
+            if (allDay) {
+                $('#calendar').fullCalendar('changeView', 'agendaDay');
+                $('#calendar').fullCalendar('gotoDate', date);
+            }else{
+                alert('Clicked on the slot: ' + date);
+            }
+
+    },
+    header: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'month,agendaWeek,agendaDay'
+    },
+    defaultView: 'agendaWeek',
+    minTime: 8,
+    aspectRatio: 1,
+})
+
+});
+</script>
+{% endblock %}

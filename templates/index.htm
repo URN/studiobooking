@@ -1,16 +1,54 @@
 {% extends "layout.htm" %}
 {% block content %}
-<div id="booking"></div>
+<div id="intro">
+Use this form to book studio time for training, pre-recording, etc.
+</div>
+<hr>
+<div id="booking">
+<form method="POST" action="{{ url_for('make_booking') }}">
+    {{ form.csrf_token }}
+    {{ form.start }}
+    {{ form.name.label }} {{ form.name() }}
+    {{ form.contact.label }} {{ form.contact() }}
+    {{ form.date.label }} {{ form.date(readonly=true) }}
+    {{ form.time.label }} {{ form.time(readonly=true) }}
+    {{ form.duration.label }} {{ form.duration() }}
+    {{ form.studio.label }} {{ form.studio() }}
+    <br>
+    {{ form.submit() }}
+    <a id="cancelbooking" class=".btn" href="#">Cancel</a>
+</form>
+</div>
 <div id="calendar"></div>
 <script>
 
-function loadBookingForm(date) {
-    $.get('/booking', function(data) {
-            $('#booking').html(data);
-        });
+function destroyBookingForm() {
+    $('#duration').val('');
+    $('#booking').hide(duration=400);
+}
+
+function showBookingForm(date) {
+    destroyBookingForm();
+    $('#booking').show(duration=400);
+    $(window).scrollTop($('#booking').offset().top);
+    $('#start').val(date.toUTCString());
+    $('#date').val(date.toDateString('dd-mm-yyyy'));
+    $('#time').val(date.toTimeString('hh-mm'));
+    $('#duration').timepicker('option', {
+        'minTime': date,
+        'maxTime': '12:00am',
+        'showDuration': true
+});
 }
 
 $(document).ready(function() {
+
+    $('#duration').timepicker();
+
+    $('#cancelbooking').click(function(event) {
+        event.preventDefault();
+        destroyBookingForm();
+    })
 
     $('#calendar').fullCalendar({
     dayClick: function(date, allDay, jsEvent, view) {
@@ -18,8 +56,8 @@ $(document).ready(function() {
             if (allDay) {
                 $('#calendar').fullCalendar('changeView', 'agendaDay');
                 $('#calendar').fullCalendar('gotoDate', date);
-            }else{
-                loadBookingForm(date);
+            } else {
+                showBookingForm(date);
             }
 
     },

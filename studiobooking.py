@@ -1,12 +1,13 @@
 from flask import Flask, render_template, request
 from flask.ext.wtf import Form
-from wtforms import TextField
+from wtforms import TextField, DateField, validators
 
 app = Flask(__name__)
 
 
 class Booking(Form):
     name = TextField('Name')
+    date = DateField('Date')
 
 
 @app.route('/admin')

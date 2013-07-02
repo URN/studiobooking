@@ -5,7 +5,7 @@ Use this form to book studio time for training, pre-recording, etc.
 </div>
 <hr>
 <div id="booking">
-<form method="POST" action="{{ url_for('make_booking') }}">
+<form id="bookingform" method="POST" action="{{ url_for('make_booking') }}">
     {{ form.csrf_token }}
     {{ form.start }}
     {{ form.name.label }} {{ form.name() }}
@@ -50,7 +50,25 @@ $(document).ready(function() {
         destroyBookingForm();
     })
 
+    $("#bookingform").submit(function() {
+
+        $('#booking').hide(duration=400);
+        $.ajax({
+            type: "POST",
+            url: '{{ url_for('make_booking') }}',
+            data: $("#bookingform").serialize(),
+            success: function(data)
+            {
+                $('#booking').html(data);
+                $('#calendar').fullCalendar('refetchEvents');
+            }
+            });
+        $('#booking').show(duration=400);
+        return false;
+    });
+
     $('#calendar').fullCalendar({
+    events: '{{ url_for('get_events') }}',
     dayClick: function(date, allDay, jsEvent, view) {
 
             if (allDay) {

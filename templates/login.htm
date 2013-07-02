@@ -1,0 +1,6 @@
+<form method="POST" action="{{ url_for('admin') }}">
+    {{ form.csrf_token }}
+    {{ form.username.label }} {{ form.username() }}
+    {{ form.password.label }} {{ form.password() }}
+    {{ form.submit() }}
+</form>

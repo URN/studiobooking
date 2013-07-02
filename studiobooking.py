@@ -1,9 +1,11 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response
 from flask.ext.wtf import Form
 from flask.ext.sqlalchemy import SQLAlchemy
-from wtforms import TextField, DateField, SelectField, HiddenField, SubmitField
+from wtforms import TextField, DateField, SelectField, \
+    HiddenField, SubmitField, PasswordField
 from datetime import datetime, timedelta
 from json import dumps
+from functools import wraps
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '123'
@@ -43,7 +45,15 @@ class Booking(db.Model):
         start = datetime.fromtimestamp(self.start).isoformat()
         end = datetime.fromtimestamp(self.end).isoformat()
         color = app.config['CALENDAR_COLORS'][self.studio]
-        return {'title': self.name,
+        if request.authorization:
+            title = '%s (%s)' % (self.name, self.contact)
+        else:
+            title = self.name
+        return {'id': self.id,
+                'title': title,
+                'name': self.name,
+                'contact': self.contact,
+                'studio': self.studio,
                 'start': start,
                 'end': end,
                 'allDay': False,
@@ -75,9 +85,69 @@ class BookingForm(Form):
     submit = SubmitField('Submit')
 
 
-@app.route('/admin')
+class LoginForm(Form):
+    username = TextField('Username')
+    password = PasswordField('Password')
+    submit = SubmitField('Login')
+
+
+def check_for_clashes(start, end):
+    start = int(start)+1
+    end = int(end)-1
+    if Booking.query.filter(Booking.start.between(start, end)).count() > 0:
+        return False
+    if Booking.query.filter(Booking.end.between(start, end)).count() > 0:
+        return False
+    return True
+
+
+def check_auth(username, password):
+    return username == 'admin' and password == 'bookings'
+
+
+def authenticate():
+    return Response('Login!', 401,
+                    {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
+
+
+@app.route('/admin', methods=['GET'])
+@requires_auth
 def admin():
-    return 'admin'
+    form = BookingForm(request.form)
+    return render_template('admin.htm', form=form)
+
+
+@app.route('/edit/<int:id>', methods=['POST'])
+@requires_auth
+def edit_booking(id):
+    form = BookingForm(request.form)
+    print form.name.data
+    print id
+    message = {}
+    message['text'] = 'Submitted!'
+    return render_template('booking_response.htm')
+
+
+@app.route('/delete/<int:id>', methods=['GET'])
+@requires_auth
+def delete_booking(id):
+    booking = Booking.query.filter(Booking.id == id).first()
+    db.session.delete(booking)
+    db.session.commit()
+    message = {}
+    message['text'] = "Deleted booking by "+booking.name
+    message['alert'] = 'alert alert-success'
+    return render_template('booking_response.htm', message=message)
 
 
 @app.route('/booking', methods=['GET', 'POST'])
@@ -91,17 +161,22 @@ def make_booking():
                                   timedelta(hours=1)
         end = datetime.strptime(form.duration.data, '%I:%M%p').time()
         end = datetime.combine(start.date(), end)
-        print start.strftime('%s')
-        print end.strftime('%s')
-        #booking = Booking(form.name.data, form.date.data)
-        booking = Booking(form.name.data, form.contact.data,
-                          start.strftime('%s'),
-                          end.strftime('%s'), form.studio.data)
-        db.session.add(booking)
-        db.session.commit()
+        start = start.strftime('%s')
+        end = end.strftime('%s')
         message = {}
-        message['text'] = 'Submitted!'
-        message['alert'] = 'alert alert-success'
+        if check_for_clashes(start, end):
+            #booking = Booking(form.name.data, form.date.data)
+            booking = Booking(form.name.data, form.contact.data,
+                              start,
+                              end, form.studio.data)
+            db.session.add(booking)
+            db.session.commit()
+            message['text'] = 'Submitted!'
+            message['alert'] = 'alert alert-success'
+        else:
+            message['text'] = 'Error: Your booking clashes \
+                               with a previous booking'
+            message['alert'] = 'alert alert-error'
         return render_template('booking_response.htm', message=message)
     return render_template('booking_form.htm', form=form)
 
@@ -112,10 +187,7 @@ def get_events():
     end = request.args['end']
     events = Booking.query.filter(Booking.start.between(start, end)).all()
     data = map(lambda x: x.as_dict(), events)
-    print data
-    print events[1].as_dict()
     return dumps(data)
-    return jsonify(events[1].as_dict())
 
 
 @app.route('/')

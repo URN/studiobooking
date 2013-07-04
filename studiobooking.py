@@ -18,19 +18,6 @@ app.config['CALENDAR_COLORS'] = ['#3D862D',  # either
 db = SQLAlchemy(app)
 
 
-#class User(db.Model):
-    #id = db.Column(db.Integer, primary_key=True)
-    #username = db.Column(db.String(80), unique=True)
-    #email = db.Column(db.String(120), unique=True)
-
-    #def __init__(self, username, email):
-        #self.username = username
-        #self.email = email
-
-    #def __repr__(self):
-        #return '<User %r>' % self.username
-
-
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120))
@@ -131,8 +118,6 @@ def admin():
 @requires_auth
 def edit_booking(id):
     form = BookingForm(request.form)
-    print form.name.data
-    print id
     message = {}
     message['text'] = 'Submitted!'
     return render_template('booking_response.htm')
@@ -154,7 +139,6 @@ def delete_booking(id):
 def make_booking():
     form = BookingForm(request.form)
     if request.method == 'POST':
-        print form.start.data
         start = form.start.data
         start = datetime.strptime(form.start.data,
                                   '%a, %d %b %Y %H:%M:%S %Z') + \

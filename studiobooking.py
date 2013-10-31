@@ -7,14 +7,13 @@ from datetime import datetime, timedelta
 from json import dumps
 from functools import wraps
 
+import settings
+
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '123'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bookings.db'
-app.config['CALENDAR_COLORS'] = ['#3D862D',  # either
-                                 '#3C76B4',  # studio 1
-                                 '#998333',  # studio 2
-                                 '#733426',  # admin event
-                                 ]
+app.config['SECRET_KEY'] = settings.SECRET_KEY
+app.config['SQLALCHEMY_DATABASE_URI'] = settings.SQLALCHEMY_DATABASE_URI
+app.config['CALENDAR_COLORS'] = settings.CALENDAR_COLORS
+
 db = SQLAlchemy(app)
 
 
@@ -22,15 +21,13 @@ class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120))
     contact = db.Column(db.String(120))
-    start = db.Column(db.Integer)
-    end = db.Column(db.Integer)
+    start = db.Column(db.DateTime)
+    end = db.Column(db.DateTime)
     studio = db.Column(db.Integer)
 
     def as_dict(self):
-        start = datetime.fromtimestamp(self.start).strftime('%Y-%m-%d %H:%M:%S')
-        end = datetime.fromtimestamp(self.end).strftime('%Y-%m-%d %H:%M:%S')
-        start = datetime.fromtimestamp(self.start).isoformat()
-        end = datetime.fromtimestamp(self.end).isoformat()
+        start = self.start.strftime('%Y-%m-%d %H:%M:%S')
+        end = self.end.strftime('%Y-%m-%d %H:%M:%S')
         color = app.config['CALENDAR_COLORS'][self.studio]
         if request.authorization:
             title = '%s (%s)' % (self.name, self.contact)
@@ -79,8 +76,10 @@ class LoginForm(Form):
 
 
 def check_for_clashes(start, end):
-    start = int(start)+1
-    end = int(end)-1
+    start = start+timedelta(seconds=1)
+    end = end-timedelta(seconds=1)
+    print start
+    print end
     if Booking.query.filter(Booking.start.between(start, end)).count() > 0:
         return False
     if Booking.query.filter(Booking.end.between(start, end)).count() > 0:
@@ -89,7 +88,7 @@ def check_for_clashes(start, end):
 
 
 def check_auth(username, password):
-    return username == 'admin' and password == 'bookings'
+    return username == 'admin' and password == settings.PASSWORD
 
 
 def authenticate():
@@ -141,12 +140,11 @@ def make_booking():
     if request.method == 'POST':
         start = form.start.data
         start = datetime.strptime(form.start.data,
-                                  '%a, %d %b %Y %H:%M:%S %Z') + \
-                                  timedelta(hours=1)
+                                  '%a, %d %b %Y %H:%M:%S %Z')
         end = datetime.strptime(form.duration.data, '%I:%M%p').time()
         end = datetime.combine(start.date(), end)
-        start = start.strftime('%s')
-        end = end.strftime('%s')
+        #start = start.strftime('%s')
+        #end = end.strftime('%s')
         message = {}
         if check_for_clashes(start, end):
             #booking = Booking(form.name.data, form.date.data)
@@ -167,8 +165,8 @@ def make_booking():
 
 @app.route('/events')
 def get_events():
-    start = request.args['start']
-    end = request.args['end']
+    start = datetime.fromtimestamp(float(request.args['start']))
+    end = datetime.fromtimestamp(float(request.args['end']))
     events = Booking.query.filter(Booking.start.between(start, end)).all()
     data = map(lambda x: x.as_dict(), events)
     return dumps(data)

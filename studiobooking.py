@@ -4,6 +4,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from wtforms import TextField, DateField, SelectField, \
     HiddenField, SubmitField, PasswordField
 from datetime import datetime, timedelta
+import time
 from json import dumps
 from functools import wraps
 
@@ -141,6 +142,8 @@ def make_booking():
         start = form.start.data
         start = datetime.strptime(form.start.data,
                                   '%a, %d %b %Y %H:%M:%S %Z')
+        if time.localtime().tm_isdst > 0:
+            start = start + timedelta(hours=1)
         end = datetime.strptime(form.duration.data, '%I:%M%p').time()
         end = datetime.combine(start.date(), end)
         #start = start.strftime('%s')

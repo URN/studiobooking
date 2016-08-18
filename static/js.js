@@ -26,7 +26,7 @@ $(document).ready(function() {
     $('#cancelbooking').click(function(event) {
         event.preventDefault();
         destroyBookingForm();
-    })
+    });
 
     $("#bookingform").submit(function() {
 
@@ -46,26 +46,27 @@ $(document).ready(function() {
     });
 
     $('#calendar').fullCalendar({
-    events: '/events',
-    dayClick: function(date, allDay, jsEvent, view) {
+        events: '/events',
+        dayClick: function(date, allDay, jsEvent, view) {
 
-            if (allDay) {
-                $('#calendar').fullCalendar('changeView', 'agendaDay');
-                $('#calendar').fullCalendar('gotoDate', date);
-            } else {
-                showBookingForm(date);
-            }
+                if (allDay) {
+                    $('#calendar').fullCalendar('changeView', 'agendaDay');
+                    $('#calendar').fullCalendar('gotoDate', date);
+                } else {
+                    showBookingForm(date);
+                }
 
-    },
-    header: {
-        left: 'prev,next today',
-        center: 'title',
-        right: 'month,agendaWeek,agendaDay'
-    },
-    defaultView: 'agendaWeek',
-    minTime: 8,
-    aspectRatio: 1,
-})
+        },
+        header: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'month,agendaWeek,agendaDay'
+        },
+        timezone: 'UTC',
+        defaultView: 'agendaWeek',
+        minTime: 8,
+        aspectRatio: 1,
+    });
 
 });
 

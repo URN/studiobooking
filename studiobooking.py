@@ -142,8 +142,11 @@ def make_booking():
         start = form.start.data
         start = datetime.strptime(form.start.data,
                                   '%a, %d %b %Y %H:%M:%S %Z')
+        # TODO: don't do this weird dst stuff
+        #       better idea to store all times as UTC and render based on users timezone
         if time.localtime().tm_isdst > 0:
-            start = start + timedelta(hours=1)
+            start = start + timedelta(hours=1) 
+        start = start.replace(tzinfo=None)
         end = datetime.strptime(form.duration.data, '%I:%M%p').time()
         end = datetime.combine(start.date(), end)
         #start = start.strftime('%s')
@@ -183,4 +186,4 @@ def index():
 
 if __name__ == '__main__':
     app.debug = True
-    app.run(host="0.0.0.0", port=1234)
+    app.run()

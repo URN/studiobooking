@@ -2,7 +2,7 @@
 studiobooking
 =============
 
-A small flask app written to facilitate booking out practice/pre-recording/interview time of URN studio's.
+A small flask app written to facilitate booking out practice/pre-recording/interview time of URN studios.
 
 Setup
 -----

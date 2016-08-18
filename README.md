@@ -7,24 +7,24 @@ A small flask app written to facilitate booking out practice/pre-recording/inter
 Setup
 -----
 
-* Install requirements
+Install requirements
 
     pip install -r requirements.txt
 
-* Change the secret key and admin password
+Change the secret key and admin password
 
     cp settings.example.py settings.py
     vim settings.py
 
-* Initialise the database
+Initialise the database
 
     python createdb.py
 
-* Run
+Run
 
     python studiobooking.py
 
-* Browse to
+Browse to
 
     http://localhost:5000
 

@@ -4,6 +4,8 @@
 Use this form to book studio time for training, pre-recording, etc.
 </div>
 <hr>
+{% include "key.htm" %}
+<hr>
 <div id="response"></div>
 <div id="booking">
 <form id="bookingform" method="POST" action="{{ url_for('make_booking') }}">

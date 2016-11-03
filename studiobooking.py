@@ -145,7 +145,7 @@ def make_booking():
         # TODO: don't do this weird dst stuff
         #       better idea to store all times as UTC and render based on users timezone
         if time.localtime().tm_isdst > 0:
-            start = start + timedelta(hours=1) 
+            start = start + timedelta(hours=1)
         start = start.replace(tzinfo=None)
         end = datetime.strptime(form.duration.data, '%I:%M%p').time()
         end = datetime.combine(start.date(), end)
@@ -181,7 +181,7 @@ def get_events():
 @app.route('/')
 def index():
     form = BookingForm(request.form)
-    return render_template('index.htm', form=form)
+    return render_template('index.htm', form=form, colors=app.config['CALENDAR_COLORS'])
 
 
 if __name__ == '__main__':

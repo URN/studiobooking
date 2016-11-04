@@ -1,5 +1,6 @@
 settings.py
 bookings.db
+venv/
 
 #################
 ## Eclipse

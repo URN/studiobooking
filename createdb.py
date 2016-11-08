@@ -1,3 +1,3 @@
-from studiobooking import db
+from __init__ import db
 
 db.create_all()

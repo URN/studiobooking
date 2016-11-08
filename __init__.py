@@ -111,7 +111,7 @@ def requires_auth(f):
 @requires_auth
 def admin():
     form = BookingForm(request.form)
-    return render_template('admin.htm', form=form)
+    return render_template('admin.htm', form=form, colors=app.config['CALENDAR_COLORS'])
 
 
 @app.route('/edit/<int:id>', methods=['POST'])

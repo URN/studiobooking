@@ -111,7 +111,8 @@ def requires_auth(f):
 @requires_auth
 def admin():
     form = BookingForm(request.form)
-    return render_template('admin.htm', form=form, colors=app.config['CALENDAR_COLORS'])
+    return render_template('admin.htm', form=form,
+                           colors=app.config['CALENDAR_COLORS'])
 
 
 @app.route('/edit/<int:id>', methods=['POST'])
@@ -143,17 +144,18 @@ def make_booking():
         start = datetime.strptime(form.start.data,
                                   '%a, %d %b %Y %H:%M:%S %Z')
         # TODO: don't do this weird dst stuff
-        #       better idea to store all times as UTC and render based on users timezone
+        # better idea to store all times as UTC
+        # and render based on users timezone
         if time.localtime().tm_isdst > 0:
             start = start + timedelta(hours=1)
         start = start.replace(tzinfo=None)
         end = datetime.strptime(form.duration.data, '%I:%M%p').time()
         end = datetime.combine(start.date(), end)
-        #start = start.strftime('%s')
-        #end = end.strftime('%s')
+        # start = start.strftime('%s')
+        # end = end.strftime('%s')
         message = {}
         if check_for_clashes(start, end):
-            #booking = Booking(form.name.data, form.date.data)
+            # booking = Booking(form.name.data, form.date.data)
             booking = Booking(form.name.data, form.contact.data,
                               start,
                               end, form.studio.data)
@@ -181,7 +183,8 @@ def get_events():
 @app.route('/')
 def index():
     form = BookingForm(request.form)
-    return render_template('index.htm', form=form, colors=app.config['CALENDAR_COLORS'])
+    return render_template('index.htm', form=form,
+                           colors=app.config['CALENDAR_COLORS'])
 
 
 if __name__ == '__main__':

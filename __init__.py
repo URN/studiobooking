@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify, Response
-from flask.ext.wtf import Form
-from flask.ext.sqlalchemy import SQLAlchemy
-from wtforms import TextField, DateField, SelectField, \
+from flask_wtf import Form
+from flask_sqlalchemy import SQLAlchemy
+from wtforms import StringField, DateField, SelectField, \
     HiddenField, SubmitField, PasswordField
 from datetime import datetime, timedelta
 import time
@@ -57,11 +57,11 @@ class Booking(db.Model):
 
 class BookingForm(Form):
     start = HiddenField()
-    name = TextField('Name')
-    contact = TextField('Contact')
-    date = TextField('Date')
+    name = StringField('Name')
+    contact = StringField('Contact')
+    date = StringField('Date')
     time = DateField('Starting time')
-    duration = TextField('Duration')
+    duration = StringField('Duration')
     studio = SelectField('Studio',
                          choices=[(0, 'Either'),
                                   (1, 'Studio 1'),
@@ -71,16 +71,16 @@ class BookingForm(Form):
 
 
 class LoginForm(Form):
-    username = TextField('Username')
+    username = StringField('Username')
     password = PasswordField('Password')
     submit = SubmitField('Login')
 
 
 def check_for_clashes(start, end):
-    start = start+timedelta(seconds=1)
-    end = end-timedelta(seconds=1)
-    print start
-    print end
+    start = start + timedelta(seconds=1)
+    end = end - timedelta(seconds=1)
+    print(start)
+    print(end)
     if Booking.query.filter(Booking.start.between(start, end)).count() > 0:
         return False
     if Booking.query.filter(Booking.end.between(start, end)).count() > 0:
@@ -104,6 +104,7 @@ def requires_auth(f):
         if not auth or not check_auth(auth.username, auth.password):
             return authenticate()
         return f(*args, **kwargs)
+
     return decorated
 
 
@@ -111,8 +112,7 @@ def requires_auth(f):
 @requires_auth
 def admin():
     form = BookingForm(request.form)
-    return render_template('admin.htm', form=form,
-                           colors=app.config['CALENDAR_COLORS'])
+    return render_template('admin.htm', form=form, colors=app.config['CALENDAR_COLORS'])
 
 
 @app.route('/edit/<int:id>', methods=['POST'])
@@ -131,7 +131,7 @@ def delete_booking(id):
     db.session.delete(booking)
     db.session.commit()
     message = {}
-    message['text'] = "Deleted booking by "+booking.name
+    message['text'] = "Deleted booking by " + booking.name
     message['alert'] = 'alert alert-success'
     return render_template('booking_response.htm', message=message)
 
@@ -176,17 +176,15 @@ def get_events():
     start = datetime.fromtimestamp(float(request.args['start']))
     end = datetime.fromtimestamp(float(request.args['end']))
     events = Booking.query.filter(Booking.start.between(start, end)).all()
-    data = map(lambda x: x.as_dict(), events)
+    data = list(map(lambda x: x.as_dict(), events))
     return dumps(data)
 
 
 @app.route('/')
 def index():
     form = BookingForm(request.form)
-    return render_template('index.htm', form=form,
-                           colors=app.config['CALENDAR_COLORS'])
+    return render_template('index.htm', form=form, colors=app.config['CALENDAR_COLORS'])
 
 
 if __name__ == '__main__':
-    app.debug = True
-    app.run()
+    app.run(host="0.0.0.0", debug=True)

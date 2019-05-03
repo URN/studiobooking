@@ -2,6 +2,9 @@ settings.py
 bookings.db
 venv/
 
+# PyCharm
+.idea
+
 #################
 ## Eclipse
 #################

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from flask import Flask, render_template, request, jsonify, Response
 from flask_wtf import Form
 from flask_sqlalchemy import SQLAlchemy

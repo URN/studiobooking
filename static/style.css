@@ -8,14 +8,14 @@ body {
 }
 
 .key {
-  display: inline-block;
-  margin: 0 0;
-  cursor: default;
+    display: inline-block;
+    margin: 0 0;
+    cursor: default;
 }
 
-.key li{
-  display: inline-block;
-  color: #fff;
-  padding: 3px;
-  border-radius: 5px;
+.key li {
+    display: inline-block;
+    color: #fff;
+    padding: 3px;
+    border-radius: 5px;
 }

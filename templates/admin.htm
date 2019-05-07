@@ -1,29 +1,29 @@
 {% extends "layout.htm" %}
 {% block head %}
-<script src="{{ url_for('static', filename='admin.js') }}"></script>
+    <script src="{{ url_for('static', filename='admin.js') }}"></script>
 {% endblock %}
 {% block content %}
-<div id="intro">
-Logged in as admin. Click on an event to delete it.
-</div>
-<hr>
-{% include "key.htm" %}
-<hr>
-<div id="response"></div>
-<div id="booking">
-<form id="bookingform" method="POST" action="/edit">
-    {{ form.csrf_token }}
-    {{ form.start }}
-    {{ form.name.label }} {{ form.name() }}
-    {{ form.contact.label }} {{ form.contact() }}
-    {{ form.date.label }} {{ form.date(readonly=true) }}
-    {{ form.time.label }} {{ form.time(readonly=true) }}
-    {{ form.duration.label }} {{ form.duration() }}
-    {{ form.studio.label }} {{ form.studio() }}
-    <br>
-    {{ form.submit() }}
-    <a id="cancelbooking" class=".btn" href="#">Cancel</a>
-</form>
-</div>
-<div id="calendar"></div>
+    <div id="intro">
+        Logged in as admin. Click on an event to delete it.
+    </div>
+    <hr>
+    {% include "key.htm" %}
+    <hr>
+    <div id="response"></div>
+    <div id="booking">
+        <form id="bookingform" method="POST" action="/edit">
+            {{ form.csrf_token }}
+            {{ form.start }}
+            {{ form.name.label }} {{ form.name() }}
+            {{ form.contact.label }} {{ form.contact() }}
+            {{ form.date.label }} {{ form.date(readonly=true) }}
+            {{ form.time.label }} {{ form.time(readonly=true) }}
+            {{ form.duration.label }} {{ form.duration() }}
+            {{ form.studio.label }} {{ form.studio() }}
+            <br>
+            {{ form.submit(class="btn") }}
+            <a id="cancelbooking" class="btn" href="#">Cancel</a>
+        </form>
+    </div>
+    <div id="calendar"></div>
 {% endblock %}
